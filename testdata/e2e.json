@@ -21,14 +21,14 @@
   },
   {
     "Send": "fekete",
-    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figurative\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figurative\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figurative, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. fekete kutya\n  _black dog_\n\n2\\. fekete kutya\n  _чорний собака_\n\n3\\. fekete disznó",
+    "Want": "*fekete \\(főnév\\)*\n\nA *legsötétebb szín*\\.\n\n_Az üzletembernek gépkocsiban a nagy, kényelmes és *fekete* tetszett\\. A gazda *feketére* festette a kert kerítését\\._\n\n*További részletezés*\n\n*1\\.**Legsötétebb színű ruha* ünnepi öltözetként vagy gyászruhaként\\.\n\n_A férfi *feketében* jelent meg az összejövetelen\\. Az özvegy még évekig *feketében* járt\\._\n\n*2\\.**Legsötétebb bőrszínű* ember, embercsoport\\.\n\n_A *feketék* ma már minden nagyobb városban laknak\\. Az Egyesült Államoknak egy *fekete* lett az elnöke\\._\n\n*3\\.**Legsötétebb* hajszínű vagy szemszínű ember\\.\n\n*\\[truncated\\]*\n\n[SOURCE](https://wikiszotar.hu/ertelmezo-szotar/fekete)",
     "WantButtons": [
       "Learn"
     ]
   },
   {
     "Send": "fekete",
-    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figurative\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figurative\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figurative, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. fekete kutya\n  _black dog_\n\n2\\. fekete kutya\n  _чорний собака_\n\n3\\. fekete disznó",
+    "Want": "*fekete \\(főnév\\)*\n\nA *legsötétebb szín*\\.\n\n_Az üzletembernek gépkocsiban a nagy, kényelmes és *fekete* tetszett\\. A gazda *feketére* festette a kert kerítését\\._\n\n*További részletezés*\n\n*1\\.**Legsötétebb színű ruha* ünnepi öltözetként vagy gyászruhaként\\.\n\n_A férfi *feketében* jelent meg az összejövetelen\\. Az özvegy még évekig *feketében* járt\\._\n\n*2\\.**Legsötétebb bőrszínű* ember, embercsoport\\.\n\n_A *feketék* ma már minden nagyobb városban laknak\\. Az Egyesült Államoknak egy *fekete* lett az elnöke\\._\n\n*3\\.**Legsötétebb* hajszínű vagy szemszínű ember\\.\n\n*\\[truncated\\]*\n\n[SOURCE](https://wikiszotar.hu/ertelmezo-szotar/fekete)",
     "WantButtons": [
       "Learn"
     ]
@@ -40,7 +40,7 @@
   },
   {
     "Send": "fekete",
-    "Want": "*fekete*\n\n1\\. \\[*adjective*\\] black \\(absorbing all light and reflecting none\\)\n2\\. \\[*adjective*\\] black \\(pertaining to a dark\\-skinned ethnic group\\)\n3\\. \\[*adjective*\\] black \\(darker than other varieties, especially of fruits and drinks\\)\n4\\. \\[*adjective*\\] \\(figurative\\) tragic, mournful, black \\(causing great sadness or suffering\\)\n5\\. \\[*adjective*\\] \\(figurative\\) black \\(derived from evil forces, or performed with the intention of doing harm\\)\n6\\. \\[*adjective*\\] \\(figurative, in compounds\\) illegal \\(contrary to or forbidden by criminal law\\)\n7\\. \\[*noun*\\] black \\(color perceived in the absence of light\\)\n8\\. \\[*noun*\\] black clothes \\(especially as mourning attire\\)\n_\\[truncated 3 definitions\\]_\n\nUsage examples:\n\n1\\. fekete kutya\n  _black dog_\n\n2\\. fekete kutya\n  _чорний собака_\n\n3\\. fekete disznó",
+    "Want": "*fekete \\(főnév\\)*\n\nA *legsötétebb szín*\\.\n\n_Az üzletembernek gépkocsiban a nagy, kényelmes és *fekete* tetszett\\. A gazda *feketére* festette a kert kerítését\\._\n\n*További részletezés*\n\n*1\\.**Legsötétebb színű ruha* ünnepi öltözetként vagy gyászruhaként\\.\n\n_A férfi *feketében* jelent meg az összejövetelen\\. Az özvegy még évekig *feketében* járt\\._\n\n*2\\.**Legsötétebb bőrszínű* ember, embercsoport\\.\n\n_A *feketék* ma már minden nagyobb városban laknak\\. Az Egyesült Államoknak egy *fekete* lett az elnöke\\._\n\n*3\\.**Legsötétebb* hajszínű vagy szemszínű ember\\.\n\n*\\[truncated\\]*\n\n[SOURCE](https://wikiszotar.hu/ertelmezo-szotar/fekete)",
     "WantButtons": [
       "Reset progress"
     ]
@@ -49,16 +49,24 @@
     "Send": "/practice",
     "Want": "fekete",
     "WantButtons": [
-      "Know",
-      "Don't know"
+      "Show Answer"
     ]
   },
   {
-    "Send": "b:Don't know",
+    "Send": "b:Show Answer",
+    "Want": "*fekete \\(főnév\\)*\n\nA *legsötétebb szín*\\.\n\n_Az üzletembernek gépkocsiban a nagy, kényelmes és *fekete* tetszett\\. A gazda *feketére* festette a kert kerítését\\._\n\n*További részletezés*\n\n*1\\.**Legsötétebb színű ruha* ünnepi öltözetként vagy gyászruhaként\\.\n\n_A férfi *feketében* jelent meg az összejövetelen\\. Az özvegy még évekig *feketében* járt\\._\n\n*2\\.**Legsötétebb bőrszínű* ember, embercsoport\\.\n\n_A *feketék* ma már minden nagyobb városban laknak\\. Az Egyesült Államoknak egy *fekete* lett az elnöke\\._\n\n*3\\.**Legsötétebb* hajszínű vagy szemszínű ember\\.\n\n*\\[truncated\\]*\n\n[SOURCE](https://wikiszotar.hu/ertelmezo-szotar/fekete)",
+    "WantButtons": [
+      "Again",
+      "Hard (1d)",
+      "Good (1d)",
+      "Easy (1d)"
+    ]
+  },
+  {
+    "Send": "b:Again",
     "Want": "fekete",
     "WantButtons": [
-      "Know",
-      "Don't know"
+      "Show Answer"
     ]
   },
   {
@@ -70,26 +78,44 @@
     "Send": "/practice",
     "Want": "fekete",
     "WantButtons": [
-      "Know",
-      "Don't know"
+      "Show Answer"
     ]
   },
   {
-    "Send": "b:Don't know",
+    "Send": "b:Show Answer",
+    "Want": "*fekete \\(főnév\\)*\n\nA *legsötétebb szín*\\.\n\n_Az üzletembernek gépkocsiban a nagy, kényelmes és *fekete* tetszett\\. A gazda *feketére* festette a kert kerítését\\._\n\n*További részletezés*\n\n*1\\.**Legsötétebb színű ruha* ünnepi öltözetként vagy gyászruhaként\\.\n\n_A férfi *feketében* jelent meg az összejövetelen\\. Az özvegy még évekig *feketében* járt\\._\n\n*2\\.**Legsötétebb bőrszínű* ember, embercsoport\\.\n\n_A *feketék* ma már minden nagyobb városban laknak\\. Az Egyesült Államoknak egy *fekete* lett az elnöke\\._\n\n*3\\.**Legsötétebb* hajszínű vagy szemszínű ember\\.\n\n*\\[truncated\\]*\n\n[SOURCE](https://wikiszotar.hu/ertelmezo-szotar/fekete)",
+    "WantButtons": [
+      "Again",
+      "Hard (1d)",
+      "Good (1d)",
+      "Easy (1d)"
+    ]
+  },
+  {
+    "Send": "b:Again",
     "Want": "fekete",
     "WantButtons": [
-      "Know",
-      "Don't know"
+      "Show Answer"
     ]
   },
   {
-    "Send": "b:Know",
+    "Send": "b:Show Answer",
+    "Want": "*fekete \\(főnév\\)*\n\nA *legsötétebb szín*\\.\n\n_Az üzletembernek gépkocsiban a nagy, kényelmes és *fekete* tetszett\\. A gazda *feketére* festette a kert kerítését\\._\n\n*További részletezés*\n\n*1\\.**Legsötétebb színű ruha* ünnepi öltözetként vagy gyászruhaként\\.\n\n_A férfi *feketében* jelent meg az összejövetelen\\. Az özvegy még évekig *feketében* járt\\._\n\n*2\\.**Legsötétebb bőrszínű* ember, embercsoport\\.\n\n_A *feketék* ma már minden nagyobb városban laknak\\. Az Egyesült Államoknak egy *fekete* lett az elnöke\\._\n\n*3\\.**Legsötétebb* hajszínű vagy szemszínű ember\\.\n\n*\\[truncated\\]*\n\n[SOURCE](https://wikiszotar.hu/ertelmezo-szotar/fekete)",
+    "WantButtons": [
+      "Again",
+      "Hard (1d)",
+      "Good (1d)",
+      "Easy (1d)"
+    ]
+  },
+  {
+    "Send": "b:Good",
     "Want": "No more rows to practice; exiting practice mode.",
     "WantButtons": null
   },
   {
     "Send": "falu",
-    "Want": "*falu*\n\n1\\. \\[*noun*\\] village\nA világ egy falu\\.The world is a village\\.\nSynonym: község\nHypernyms: település, helység\nHyponyms: törpefalu \\(\u003c100\\), aprófalu \\(100–500\\), kisfalu \\(500–1,000\\), középfalu \\(1,000–2,000\\), nagyfalu \\(2,000–5,000\\), óriásfalu \\(5,000–10,000 of population\\)\nCoordinate term: város \\(town or city\\)\n\nDidn't find usage examples\\.",
+    "Want": "*falu \\(főnév\\)*\n\n*1\\.**Mezőgazdasági jellegű település*\\. A városnál rendszerint kisebb, laza építkezésű, háziállatok tartására is alkalmas településforma\\. A házai általában földszintesek, nagyobb telken épülnek, konyhakert tartozik hozzájuk\\. \n\n_A városi emberek nyaranta szívesen utaznak el *falu*ra vakációzni\\. A *falu*ban szinte alig van szolgáltatóipar, mert nincs elég helyi lakos, aki eltartaná az ilyen vállalkozót\\. Minden *falu*hoz tartozik egy vagy több templom, attól függően, milyen vallásúak az ott élő emberek\\. Sokszor ha valaki hivatalos ügyeket akar intézni, akkor a *falu*ból be kell utaznia a legközelebbi városba\\._\n\n*\\[truncated\\]*\n\n[img](https://wikiszotar.hu//images/0/0c/Falu.jpg) [SOURCE](https://wikiszotar.hu/ertelmezo-szotar/falu)",
     "WantButtons": [
       "Learn"
     ]
@@ -103,16 +129,24 @@
     "Send": "/practice",
     "Want": "falu",
     "WantButtons": [
-      "Know",
-      "Don't know"
+      "Show Answer"
     ]
   },
   {
-    "Send": "b:Don't know",
+    "Send": "b:Show Answer",
+    "Want": "*falu \\(főnév\\)*\n\n*1\\.**Mezőgazdasági jellegű település*\\. A városnál rendszerint kisebb, laza építkezésű, háziállatok tartására is alkalmas településforma\\. A házai általában földszintesek, nagyobb telken épülnek, konyhakert tartozik hozzájuk\\. \n\n_A városi emberek nyaranta szívesen utaznak el *falu*ra vakációzni\\. A *falu*ban szinte alig van szolgáltatóipar, mert nincs elég helyi lakos, aki eltartaná az ilyen vállalkozót\\. Minden *falu*hoz tartozik egy vagy több templom, attól függően, milyen vallásúak az ott élő emberek\\. Sokszor ha valaki hivatalos ügyeket akar intézni, akkor a *falu*ból be kell utaznia a legközelebbi városba\\._\n\n*\\[truncated\\]*\n\n[img](https://wikiszotar.hu//images/0/0c/Falu.jpg) [SOURCE](https://wikiszotar.hu/ertelmezo-szotar/falu)",
+    "WantButtons": [
+      "Again",
+      "Hard (1d)",
+      "Good (1d)",
+      "Easy (1d)"
+    ]
+  },
+  {
+    "Send": "b:Again",
     "Want": "falu",
     "WantButtons": [
-      "Know",
-      "Don't know"
+      "Show Answer"
     ]
   },
   {
@@ -218,11 +252,37 @@
     ]
   },
   {
+    "Send": "/add",
+    "Want": "Enter front of the card (word, expression, question).",
+    "WantButtons": null
+  },
+  {
+    "Send": "card 2",
+    "Want": "Enter back of the card (definition, answer).",
+    "WantButtons": null
+  },
+  {
+    "Send": "card 2 def",
+    "Want": "Added \"card 2\" for learning!",
+    "WantButtons": null
+  },
+  {
+    "Send": "card 2",
+    "Want": "card 2 def",
+    "WantButtons": [
+      "Reset progress"
+    ]
+  },
+  {
     "Send": "/practice",
     "Want": "cardfront",
     "WantButtons": [
-      "Know",
-      "Don't know"
+      "Show Answer"
     ]
+  },
+  {
+    "Send": "/stats",
+    "Want": "Number of words saved for learning: 3",
+    "WantButtons": null
   }
 ]

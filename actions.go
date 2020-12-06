@@ -17,7 +17,10 @@
 // users can take.
 package main
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // TODO: I am not sure if this is the best decision to bundle all up together.
 // All objects needed to perform actions.
@@ -32,7 +35,7 @@ type Clients struct {
 func flipWordCard(c *Clients, word string, m *Message, ks []*InlineKeyboard) error {
 	// TODO: It isn't always neccessary to retrieve defitnion when this
 	// function is used.
-	def, err := c.Repetitions.GetDefinition(m.Chat.Id, word)
+	def, entities, err := c.Repetitions.GetDefinition(m.Chat.Id, word)
 	if err != nil {
 		return fmt.Errorf("retrieving definition: %v", err)
 	}
@@ -45,9 +48,10 @@ func flipWordCard(c *Clients, word string, m *Message, ks []*InlineKeyboard) err
 		// TODO: Enable replying in markdown, but for that need to store
 		// definitions escaped.
 		//ParseMode:   "MarkdownV2",
-		Text: def,
+		Text:     def,
+		Entities: json.RawMessage(entities),
 		// FIXME: Should InlineKeyboard be refactored for less duplication?
-		ReplyMarkup: ReplyMarkup{
+		ReplyMarkup: &InlineKeyboardMarkup{
 			InlineKeyboard: [][]*InlineKeyboard{ks},
 		},
 	}

@@ -2,7 +2,7 @@ secret.go
 *.swp
 *.swo
 db.sql
-words
+words.local
 migrate/migrate
 words_image.tar
 loader_image.tar

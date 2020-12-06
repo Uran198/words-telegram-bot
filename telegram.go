@@ -43,12 +43,13 @@ func methodURL(m string) string {
 // possible to change reply_markup in editMessageText (apart from inlined
 // keyboard).
 type Message struct {
-	Id   int64  `json:"message_id"`
-	Text string `json:"text"`
-	Chat struct {
+	Id       int64           `json:"message_id"`
+	Text     string          `json:"text"`
+	Entities json.RawMessage `json:"entities,omitempty"`
+	Chat     struct {
 		Id int64 `json:"id"`
 	} `json:"chat"`
-	ReplyMarkup ReplyMarkup `json:"reply_markup"`
+	ReplyMarkup interface{} `json:"reply_markup"`
 }
 
 type CallbackQuery struct {
@@ -78,23 +79,37 @@ type InlineKeyboard struct {
 	CallbackData string `json:"callback_data"`
 }
 
-type ReplyMarkup struct {
+type InlineKeyboardMarkup struct {
 	InlineKeyboard [][]*InlineKeyboard `json:"inline_keyboard"`
 }
 
+// https://core.telegram.org/bots/api#keyboardbutton
+type ReplyKeyboardButton struct {
+	Text            string `json:"text"`
+	RequestLocation bool   `json:"request_location,omitempty"`
+}
+
+type ReplyKeyboardMarkup struct {
+	Keyboard [][]*ReplyKeyboardButton `json:"keyboard"`
+	Resize   bool                     `json:"resize_keyboard,omitempty"`
+	OneTime  bool                     `json:"one_time_keyboard,omitempty"`
+}
+
 type MessageReply struct {
-	ChatId      int64        `json:"chat_id"`
-	Text        string       `json:"text"`
-	ReplyMarkup *ReplyMarkup `json:"reply_markup,omitempty"`
-	ParseMode   string       `json:"parse_mode,omitempty"`
+	ChatId      int64           `json:"chat_id"`
+	Text        string          `json:"text"`
+	Entities    json.RawMessage `json:"entities,omitempty"`
+	ReplyMarkup interface{}     `json:"reply_markup,omitempty"`
+	ParseMode   string          `json:"parse_mode,omitempty"`
 }
 
 type EditMessageText struct {
-	ChatId      int64       `json:"chat_id"`
-	MessageId   int64       `json:"message_id"`
-	ParseMode   string      `json:"parse_mode,omitempty"`
-	Text        string      `json:"text,omitempty"`
-	ReplyMarkup ReplyMarkup `json:"reply_markup,omitempty"`
+	ChatId      int64           `json:"chat_id"`
+	MessageId   int64           `json:"message_id"`
+	ParseMode   string          `json:"parse_mode,omitempty"`
+	Text        string          `json:"text,omitempty"`
+	Entities    json.RawMessage `json:"entities,omitempty"`
+	ReplyMarkup interface{}     `json:"reply_markup,omitempty"`
 }
 
 type Telegram struct {

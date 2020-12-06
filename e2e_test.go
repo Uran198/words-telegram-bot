@@ -35,7 +35,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// TODO: have a fake wiki server.
+// TODO: have a fake servers. Tests will work faster, even though less e2e.
 func TestTelegramBotE2E(t *testing.T) {
 	// TODO: mock wiki
 	// TODO: test edit message
@@ -66,15 +66,21 @@ fekete
 
 /practice
 
-b:Don't know
+b:Show Answer
+
+b:Again
 
 /settings
 
 /practice
 
-b:Don't know
+b:Show Answer
 
-b:Know
+b:Again
+
+b:Show Answer
+
+b:Good
 
 falu
 
@@ -82,7 +88,9 @@ b:Learn
 
 /practice
 
-b:Don't know
+b:Show Answer
+
+b:Again
 
 /stop
 
@@ -124,7 +132,17 @@ cardback (definitions or what not)
 
 cardfront
 
+/add
+
+card 2
+
+card 2 def
+
+card 2
+
 /practice
+
+/stats
 `, "\n"), "\n\n")
 
 	dir, err := ioutil.TempDir("", "e2e")
@@ -148,8 +166,8 @@ cardfront
 	tm := &Telegram{hc: *fk.server.Client()}
 
 	c, err := NewCommander(tm, &CommanderOptions{
-		useCache: true,
-		dbPath:   dbPath,
+		dbPath:     dbPath,
+		againDelay: 0,
 		stages: []time.Duration{
 			0,
 			2 * time.Minute,
@@ -174,11 +192,31 @@ cardfront
 		}
 		lm := fk.messages[len(fk.messages)-1]
 		var bs []string
-		for _, ks := range lm.ReplyMarkup.InlineKeyboard {
-			for _, k := range ks {
-				bs = append(bs, k.Text)
+		switch rm := lm.ReplyMarkup.(type) {
+		case nil:
+		// FIXME: This is extremely annoying. I am not yet sure what is the best solution. Maybe json.RawMessage should be used?
+		case map[string]interface{}:
+			// Is it InlineKeyboardMarkup?
+			if ik, ok := rm["inline_keyboard"]; ok {
+				for _, ks := range ik.([]interface{}) {
+					for _, k := range ks.([]interface{}) {
+						m := k.(map[string]interface{})
+						bs = append(bs, m["text"].(string))
+					}
+				}
+				// Is it ReplyKeyboardMarkup?
+			} else if rk, ok := rm["keyboard"]; ok {
+				for _, ks := range rk.([]interface{}) {
+					for _, k := range ks.([]interface{}) {
+						m := k.(map[string]interface{})
+						bs = append(bs, m["text"].(string))
+					}
+				}
 			}
+		default:
+			t.Fatalf("Unsupported type for ReplyMarkup %v. Please extent e2e_test.", rm)
 		}
+		// TODO: Tests should take into account if several messages were returned.
 		got = append(got, Test{
 			Send:        msg,
 			Want:        lm.Text,
@@ -294,15 +332,16 @@ func (fk *fakeTelegram) SendMessage(s string) {
 
 func (fk *fakeTelegram) PressButton(button string) error {
 	lm := fk.messages[len(fk.messages)-1]
-	for _, ks := range lm.ReplyMarkup.InlineKeyboard {
-		for _, k := range ks {
-			if k.Text == button {
+	for _, ks := range lm.ReplyMarkup.(map[string]interface{})["inline_keyboard"].([]interface{}) {
+		for _, k := range ks.([]interface{}) {
+			m := k.(map[string]interface{})
+			if strings.HasPrefix(m["text"].(string), button) {
 				fk.updates = append(fk.updates, Update{
 					UpdateId: 0,
 					CallbackQuery: &CallbackQuery{
 						Id:      "0",
 						Message: lm,
-						Data:    k.CallbackData,
+						Data:    m["callback_data"].(string),
 					},
 				})
 				return nil

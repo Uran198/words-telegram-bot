@@ -30,12 +30,11 @@ import (
 
 type Callback interface {
 	Call(*State, *CallbackQuery) error
-	Match(*State, *CallbackQuery) bool
-	AsInlineKeyboard() *InlineKeyboard
 }
 
 type State struct {
 	*Clients
+	Cache *WordsCache
 }
 
 // TODO:
@@ -105,12 +104,12 @@ func (b *Bot) Update(u *Update) (err error) {
 	}()
 
 	if u.CallbackQuery != nil {
-		for _, c := range CommandsTemplate.Callbacks {
-			if c.Match(b.state, u.CallbackQuery) {
-				return c.Call(b.state, u.CallbackQuery)
-			}
+		var c CallbackInfo
+		// Make sure that we can unmarshall, so that we don't panic accidentally later on.
+		if err = json.Unmarshal([]byte(u.CallbackQuery.Data), &c); err != nil {
+			return fmt.Errorf("Failed to unmarshal callback query %s: %w", u.CallbackQuery.Data, err)
 		}
-		return fmt.Errorf("INTERNAL ERROR: Did find a corresponding callback for callback query: %v", u.CallbackQuery)
+		return CommandsTemplate.Callback[c.Action].Call(b.state, u.CallbackQuery)
 	}
 
 	if u.Message == nil {
@@ -181,8 +180,8 @@ type CommandFactory func(name string) Command
 
 // UserError is an error that should be surfaced to the user.
 type UserError struct {
-	Err    error
 	ChatID int64
+	Err    error
 }
 
 func (u UserError) Error() string {
@@ -219,9 +218,16 @@ type multiQuestionCommand struct {
 
 func MultiQuestionCommandFactory(questions []*question, save func(state *State, chatID int64, questions []*question) error) CommandFactory {
 	return func(name string) Command {
+		// We need to copy questions to avoid reusing the same questions for
+		// multiple instances.
+		cq := make([]*question, len(questions))
+		for i, q := range questions {
+			cq[i] = new(question)
+			*cq[i] = *q
+		}
 		return &multiQuestionCommand{
 			name:      name,
-			questions: questions,
+			questions: cq,
 			save:      save,
 		}
 	}
@@ -325,20 +331,17 @@ func ReplyCommand(reply func(s *State, chatID int64) error) CommandFactory {
 	)
 }
 
-func NewMessageReply(chatID int64, text string, callbacks []Callback) *MessageReply {
-	var ik []*InlineKeyboard
-	for _, c := range callbacks {
-		ik = append(ik, c.AsInlineKeyboard())
-	}
-	var rm *ReplyMarkup
+func NewMessageReply(chatID int64, text, entities string, ik ...*InlineKeyboard) *MessageReply {
+	var rm interface{}
 	if len(ik) > 0 {
-		rm = &ReplyMarkup{
+		rm = &InlineKeyboardMarkup{
 			InlineKeyboard: [][]*InlineKeyboard{ik},
 		}
 	}
 	return &MessageReply{
 		ChatId:      chatID,
 		Text:        text,
+		Entities:    json.RawMessage(entities),
 		ReplyMarkup: rm,
 	}
 }
@@ -358,7 +361,8 @@ func practiceReply(s *State, chatID int64) error {
 	if err != nil {
 		return fmt.Errorf("retrieving word for repetition: %w", err)
 	}
-	return s.Telegram.SendMessage(NewMessageReply(chatID, word, []Callback{KnowCallback{word}, DontKnowCallback{word, true}}))
+	id := s.Cache.Add(chatID, word)
+	return s.Telegram.SendMessage(NewMessageReply(chatID, word, "", showAnswerIK(id)))
 }
 
 // settingsReply sends current settings and instructions on how to change them.
@@ -390,7 +394,20 @@ Time Zone: %s
 To modify settings use one of the commands below:
 %s
 `, s.InputLanguage, s.InputLanguageISO639_3, strings.Join(ls, ","), s.TimeZone, strings.Join(cmds, "\n"))
-	return state.Telegram.SendMessage(NewMessageReply(chatID, msg, nil))
+	return state.Telegram.SendMessage(&MessageReply{
+		ChatId: chatID,
+		Text:   msg,
+	})
+}
+
+// statsReply sends current stats to the user.
+func statsReply(state *State, chatID int64) error {
+	s, err := state.Repetitions.Stats(chatID)
+	if err != nil {
+		return err
+	}
+	msg := fmt.Sprintf("Number of words saved for learning: %d", s.WordCount)
+	return state.Telegram.SendMessage(NewMessageReply(chatID, msg, ""))
 }
 
 // This inteface is a bit redundant. We need it though to avoid initialization
@@ -470,7 +487,8 @@ func AddCommandFactory() CommandFactory {
 					return fmt.Errorf("unexpected question in save: %v", q)
 				}
 			}
-			if err := s.Repetitions.Save(chatID, front, back); err != nil {
+			// FIXME: Preserve entities, so user's formatting will be saved.
+			if err := s.Repetitions.Save(chatID, front, back, ""); err != nil {
 				return err
 			}
 			return s.Telegram.SendTextMessage(chatID, fmt.Sprintf("Added %q for learning!", front))
@@ -513,20 +531,21 @@ func (defaultCommand) Init(*SerializedCommand) error {
 }
 func (defaultCommand) ProcessMessage(s *State, m *Message) (Command, error) {
 	chatID := m.Chat.Id
+	wordID := s.Cache.Add(chatID, m.Text)
+
+	def, entities, err := s.Repetitions.GetDefinition(m.Chat.Id, m.Text)
+	if err == nil {
+		return nil, s.Telegram.SendMessage(NewMessageReply(
+			m.Chat.Id, def, entities, resetProgressIK(wordID)))
+	}
+	if err != sql.ErrNoRows {
+		log.Printf("ERROR: Repetitions(%d, %s): %v", m.Chat.Id, m.Text, err)
+	}
 
 	if len(strings.Split(m.Text, " ")) > 1 {
 		return nil, UserError{ChatID: chatID, Err: fmt.Errorf("For now this bot doesn't work with expressions. Try entering a single work without spaces.")}
 	}
 
-	def, err := s.Repetitions.GetDefinition(m.Chat.Id, m.Text)
-	if err == nil {
-		return nil, s.Telegram.SendMessage(NewMessageReply(
-			m.Chat.Id, def,
-			[]Callback{ResetProgressCallback{m.Text}}))
-	}
-	if err != sql.ErrNoRows {
-		log.Printf("ERROR: Repetitions(%d, %s): %v", m.Chat.Id, m.Text, err)
-	}
 	settings, err := s.Settings.Get(chatID)
 	if err != nil {
 		return nil, fmt.Errorf("get settings: %v", err)
@@ -546,9 +565,9 @@ func (defaultCommand) ProcessMessage(s *State, m *Message) (Command, error) {
 			ChatId:    m.Chat.Id,
 			Text:      d,
 			ParseMode: "MarkdownV2",
-			ReplyMarkup: &ReplyMarkup{
+			ReplyMarkup: &InlineKeyboardMarkup{
 				InlineKeyboard: [][]*InlineKeyboard{[]*InlineKeyboard{
-					LearnCallback{m.Text}.AsInlineKeyboard(),
+					learnIK(wordID),
 				}},
 			},
 		}); err != nil {
@@ -619,9 +638,9 @@ var SettingsCommands = map[string]CommandFactory{
 var CommandsTemplate = struct {
 	// When receiving a callback it will be matched here.
 	// Tests should test that each callback is reachable.
-	// Callbacks can rely only on info got from the CallbackQuery,
-	// Everything stored in callback should be used only in AsInlineKeyboard method.
-	Callbacks []Callback
+	// Callbacks can rely only on info got from the CallbackQuery, and what is
+	// set in CommandsTemplate.
+	Callback map[CallbackAction]Callback
 	// Each key in the map should directly correspond to the name of the command.
 	// Possible improvement would be to allow regexps in the Commands name so
 	// arguments can be passed there.
@@ -640,15 +659,19 @@ var CommandsTemplate = struct {
 			"/stop":     textReply("Stopped. Input the word to get it's definition."),
 			"/practice": ReplyCommand(practiceReply),
 			"/settings": ReplyCommand(settingsReply),
+			"/stats":    ReplyCommand(statsReply),
 			"/add":      AddCommandFactory(),
 			"/delete":   DeleteCommandFactory(),
 		},
 		SettingsCommands,
 	),
-	Callbacks: []Callback{
-		KnowCallback{},
-		DontKnowCallback{},
-		LearnCallback{},
+	Callback: map[CallbackAction]Callback{
+		PracticeKnowAction:     KnowCallback{},
+		PracticeDontKnowAction: DontKnowCallback{},
+		ResetProgressAction:    DontKnowCallback{},
+		SaveWordAction:         LearnCallback{},
+		PracticeAnswerAction:   AnswerCallback{},
+		ShowAnswerAction:       ShowAnswerCallback{},
 	},
 	DefaultCommand: func(string) Command { return defaultCommand{} },
 }

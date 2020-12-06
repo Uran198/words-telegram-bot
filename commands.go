@@ -88,21 +88,24 @@ const (
 	SaveWordAction CallbackAction = iota
 	PracticeKnowAction
 	PracticeDontKnowAction
-	PracticeDontKnowActionNoPractice
+	ResetProgressAction
+	PracticeAnswerAction
+	ShowAnswerAction
 )
 
 // Make sure all fields are Public, otherwise encoding will not work
+// NOTE: Maximum size of this struct when json-encoded in 64 bytes.
 // TODO: Should include ID to make sure the same action is not performed many
 // times? In general should keep track of different IDs to make sure that stuff
 // is not processed more than once?
 type CallbackInfo struct {
 	Action CallbackAction
-	// One of below is set depending on the action.
-	Word    string
-	Setting string
+	// Not every field below will be set for each action.
+	WordID int64
+	Ease   AnswerEase
 }
 
-// FIXME: Should return an error?
+// FIXME: Should return an error!
 func CallbackInfoFromString(s string) CallbackInfo {
 	var c CallbackInfo
 	if err := json.Unmarshal([]byte(s), &c); err != nil {
@@ -125,14 +128,15 @@ type Commander struct {
 }
 
 type CommanderOptions struct {
-	useCache bool
-	dbPath   string
-	port     int
-	certPath string
-	keyPath  string
-	ip       string
-	push     bool
-	stages   []time.Duration
+	againDelay     time.Duration
+	dbPath         string
+	port           int
+	certPath       string
+	keyPath        string
+	ip             string
+	push           bool
+	stages         []time.Duration
+	wordsCacheSize int
 }
 
 func escapeMarkdown(s string) string {
@@ -161,16 +165,6 @@ func escapeMarkdown(s string) string {
 
 func NewCommander(tm *Telegram, opts *CommanderOptions) (*Commander, error) {
 	hc := &http.Client{}
-	var cache DefCacheInterface
-	if opts.useCache {
-		var err error
-		cache, err = NewDefCache(opts.dbPath)
-		if err != nil {
-			return nil, fmt.Errorf("new cache(%q): %w", opts.dbPath, err)
-		}
-	} else {
-		cache = &NoCache{}
-	}
 	// TODO: Can use errgroup if there is a need to paralelize. This is the
 	// slowest step in initialization.
 	uf, err := NewUsageFetcher(opts.dbPath)
@@ -183,13 +177,13 @@ func NewCommander(tm *Telegram, opts *CommanderOptions) (*Commander, error) {
 	}
 	d := &Definer{
 		usage: uf,
-		cache: cache,
 		http:  hc,
 	}
 	r, err := NewRepetition(opts.dbPath, opts.stages)
 	if err != nil {
 		return nil, err
 	}
+	r.againDelay = opts.againDelay
 	c := &Clients{
 		Telegram:    tm,
 		Definer:     d,
@@ -207,7 +201,7 @@ func NewCommander(tm *Telegram, opts *CommanderOptions) (*Commander, error) {
 	return &Commander{
 		Clients: c,
 		bot: &Bot{
-			state:   &State{c},
+			state:   &State{c, NewWordsCache(opts.wordsCacheSize)},
 			command: make(map[int64]Command),
 		},
 	}, nil

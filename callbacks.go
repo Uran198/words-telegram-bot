@@ -13,56 +13,134 @@
 // limitations under the License.
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
-type KnowCallback struct {
-	Word string
+type ShowAnswerCallback struct{}
+
+func (ShowAnswerCallback) Call(s *State, q *CallbackQuery) error {
+	defer s.Telegram.AnswerCallbackLog(q.Id, "")
+	chatID := q.Message.Chat.Id
+	ci := CallbackInfoFromString(q.Data)
+	word, ok := s.Cache.Get(chatID, ci.WordID)
+	if !ok {
+		s.Telegram.AnswerCallbackLog(q.Id, "Sorry, button is too old, or bot restarted recently.")
+		return nil
+	}
+
+	var ik []*InlineKeyboard
+	for _, ease := range []AnswerEase{AnswerAgain, AnswerHard, AnswerGood, AnswerEasy} {
+		sc, err := s.Repetitions.CalcSchedule(chatID, word, ease)
+		if err != nil {
+			return err
+		}
+		ik = append(ik, answerIK(ci.WordID, ease, sc.ivl))
+	}
+	return flipWordCard(s.Clients, word, q.Message, ik)
 }
+
+func showAnswerIK(wordID int64) *InlineKeyboard {
+	return &InlineKeyboard{
+		Text: "Show Answer",
+		CallbackData: CallbackInfo{
+			Action: ShowAnswerAction,
+			WordID: wordID,
+		}.String(),
+	}
+}
+
+type AnswerCallback struct{}
+
+func (AnswerCallback) Call(s *State, q *CallbackQuery) error {
+	defer s.Telegram.AnswerCallbackLog(q.Id, "")
+	chatID := q.Message.Chat.Id
+	ci := CallbackInfoFromString(q.Data)
+	word, ok := s.Cache.Get(chatID, ci.WordID)
+	if !ok {
+		s.Telegram.AnswerCallbackLog(q.Id, "Sorry, button is too old, or bot restarted recently.")
+		return nil
+	}
+	ease := ci.Ease
+
+	// FIXME: Need to handle 2 rapid taps to avoid answering it 2 times in a row.
+	if err := s.Repetitions.Answer(chatID, word, ease); err != nil {
+		return err
+	}
+
+	// FIXME: This is a bit hacky. The only thing that we want to edit here is
+	// to remove all inline keyboard, but flipWordCard in addition queries DB
+	// for definition, which is unnecessary in this case.
+	if err := flipWordCard(s.Clients, word, q.Message, nil); err != nil {
+		return err
+	}
+
+	return practiceReply(s, chatID)
+}
+
+func answerIK(wordID int64, ease AnswerEase, ivl int64) *InlineKeyboard {
+	var text string
+	switch ease {
+	case AnswerAgain:
+		text = "Again"
+	case AnswerHard:
+		text = "Hard"
+	case AnswerGood:
+		text = "Good"
+	case AnswerEasy:
+		text = "Easy"
+	default:
+		text = "UnknownEase"
+	}
+	if ivl > 0 {
+		text = fmt.Sprintf("%s (%dd)", text, ivl)
+	}
+	return &InlineKeyboard{
+		Text: text,
+		CallbackData: CallbackInfo{
+			Action: PracticeAnswerAction,
+			Ease:   ease,
+			WordID: wordID,
+		}.String(),
+	}
+}
+
+type KnowCallback struct{}
 
 func (KnowCallback) Call(s *State, q *CallbackQuery) error {
 	defer s.Telegram.AnswerCallbackLog(q.Id, "")
 	chatID := q.Message.Chat.Id
-	word := CallbackInfoFromString(q.Data).Word
+	ci := CallbackInfoFromString(q.Data)
+	word, ok := s.Cache.Get(chatID, ci.WordID)
+	if !ok {
+		s.Telegram.AnswerCallbackLog(q.Id, "Sorry, button is too old, or bot restarted recently.")
+		return nil
+	}
 
 	// TODO: Need to handle 2 rapid taps to avoid saving it as known 2 times in a row.
-	if err := s.Repetitions.AnswerKnow(chatID, word); err != nil {
+	if err := s.Repetitions.Answer(chatID, word, AnswerGood); err != nil {
 		return err
 	}
 
-	if err := flipWordCard(s.Clients, word, q.Message, []*InlineKeyboard{DontKnowCallback{word, false}.AsInlineKeyboard()}); err != nil {
+	if err := flipWordCard(s.Clients, word, q.Message, []*InlineKeyboard{resetProgressIK(ci.WordID)}); err != nil {
 		return err
 	}
 	return practiceReply(s, chatID)
 }
 
-func (KnowCallback) Match(s *State, q *CallbackQuery) bool {
-	info := CallbackInfoFromString(q.Data)
-	return info.Action == PracticeKnowAction
-}
-
-func (k KnowCallback) AsInlineKeyboard() *InlineKeyboard {
-	return &InlineKeyboard{
-		Text: "Know",
-		CallbackData: CallbackInfo{
-			Action: PracticeKnowAction,
-			Word:   k.Word,
-		}.String(),
-	}
-}
-
-type DontKnowCallback struct {
-	Word string
-	// If true when clicking another practice card will be shown.
-	Practice bool
-}
+type DontKnowCallback struct{}
 
 func (DontKnowCallback) Call(s *State, q *CallbackQuery) error {
 	defer s.Telegram.AnswerCallbackLog(q.Id, "Reset progress")
 	info := CallbackInfoFromString(q.Data)
 	chatID := q.Message.Chat.Id
-	word := info.Word
+	word, ok := s.Cache.Get(chatID, info.WordID)
+	if !ok {
+		s.Telegram.AnswerCallbackLog(q.Id, "Sorry, button is too old, or bot restarted recently.")
+		return nil
+	}
 
-	if err := s.Repetitions.AnswerDontKnow(chatID, word); err != nil {
+	if err := s.Repetitions.Answer(chatID, word, AnswerAgain); err != nil {
 		return err
 	}
 
@@ -70,71 +148,40 @@ func (DontKnowCallback) Call(s *State, q *CallbackQuery) error {
 		return err
 	}
 
-	if info.Action == PracticeDontKnowActionNoPractice {
+	if info.Action == ResetProgressAction {
 		return nil
 	}
 	return practiceReply(s, chatID)
 }
 
-func (DontKnowCallback) Match(_ *State, q *CallbackQuery) bool {
-	info := CallbackInfoFromString(q.Data)
-	return info.Action == PracticeDontKnowAction || info.Action == PracticeDontKnowActionNoPractice
-}
-
-func (c DontKnowCallback) AsInlineKeyboard() *InlineKeyboard {
-	a := PracticeDontKnowActionNoPractice
-	if c.Practice {
-		a = PracticeDontKnowAction
-	}
-	return &InlineKeyboard{
-		Text: "Don't know",
-		CallbackData: CallbackInfo{
-			Action: a,
-			Word:   c.Word,
-		}.String(),
-	}
-}
-
-type ResetProgressCallback struct {
-	Word string
-}
-
-// ResetProgress type is just a convenience placeholder to create inline keyboards.
-// Logic will be handled by dont know callback.
-func (ResetProgressCallback) Call(_ *State, _ *CallbackQuery) error {
-	return nil
-}
-
-func (ResetProgressCallback) Match(_ *State, _ *CallbackQuery) bool {
-	return false
-}
-
-func (c ResetProgressCallback) AsInlineKeyboard() *InlineKeyboard {
+func resetProgressIK(wordID int64) *InlineKeyboard {
 	return &InlineKeyboard{
 		Text: "Reset progress",
 		CallbackData: CallbackInfo{
-			Action: PracticeDontKnowActionNoPractice,
-			Word:   c.Word,
+			Action: ResetProgressAction,
+			WordID: wordID,
 		}.String(),
 	}
 }
 
-type LearnCallback struct {
-	Word string
-}
+type LearnCallback struct{}
 
 func (LearnCallback) Call(s *State, q *CallbackQuery) error {
 	// FIXME: Next 3 lines are very common.
 	chatID := q.Message.Chat.Id
-	word := CallbackInfoFromString(q.Data).Word
-	if err := s.Repetitions.Save(chatID, word, q.Message.Text); err != nil {
+	word, ok := s.Cache.Get(chatID, CallbackInfoFromString(q.Data).WordID)
+	if !ok {
+		s.Telegram.AnswerCallbackLog(q.Id, "Sorry, button is too old, or bot restarted recently.")
+		return nil
+	}
+	if err := s.Repetitions.Save(chatID, word, q.Message.Text, string(q.Message.Entities)); err != nil {
 		return err
 	}
 	m := q.Message
 	r := &EditMessageText{
 		ChatId:    m.Chat.Id,
 		MessageId: m.Id,
-		ReplyMarkup: ReplyMarkup{
+		ReplyMarkup: InlineKeyboardMarkup{
 			InlineKeyboard: [][]*InlineKeyboard{
 				[]*InlineKeyboard{},
 			},
@@ -149,17 +196,12 @@ func (LearnCallback) Call(s *State, q *CallbackQuery) error {
 	return nil
 }
 
-func (LearnCallback) Match(_ *State, q *CallbackQuery) bool {
-	info := CallbackInfoFromString(q.Data)
-	return info.Action == SaveWordAction
-}
-
-func (c LearnCallback) AsInlineKeyboard() *InlineKeyboard {
+func learnIK(wordID int64) *InlineKeyboard {
 	return &InlineKeyboard{
 		Text: "Learn",
 		CallbackData: CallbackInfo{
 			Action: SaveWordAction,
-			Word:   c.Word,
+			WordID: wordID,
 		}.String(),
 	}
 }
